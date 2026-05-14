@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>San Andreas Radio</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Gothic+A1:wght@800&family=Orbitron:wght@600&display=swap');
+    
+    body {
+      margin: 0;
+      background: #000000;
+      color: #eee;
+      font-family: 'Gothic A1', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      user-select: none;
+      overflow: hidden;
+      overscroll-behavior: none; 
+    }
+    
+    .view {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      animation: fadeIn 0.5s ease;
+    }
+    .view.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* === MENU INICIAL === */
+    #menuTitle {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      color: #ffaa00;
+      margin-bottom: 50px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-align: center;
+      text-shadow: 0 0 20px rgba(255, 170, 0, 0.4);
+    }
+    
+    .btn-start {
+      background: transparent; 
+      color: #fff; 
+      border: 2px solid #555;
+      padding: 16px 60px; 
+      font-size: 1.3rem; 
+      font-family: 'Orbitron', sans-serif;
+      cursor: pointer; 
+      transition: all 0.3s ease;
+      text-transform: uppercase; 
+      letter-spacing: 2px;
+      border-radius: 4px;
+    }
+    .btn-start:hover {
+      background: #ffaa00; 
+      color: #000; 
+      border-color: #ffaa00;
+      box-shadow: 0 0 15px rgba(255,170,0,0.5);
+      transform: scale(1.05);
+    }
+
+    /* === TELA DO PLAYER === */
+    #viewPlayer {
+      cursor: grab;
+      position: relative;
+      touch-action: pan-y; /* Permitir interações baseadas em Y no touch */
+    }
+    #viewPlayer:active { cursor: grabbing; }
+
+    #radioHeader {
+      position: absolute;
+      top: 40px;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      width: 90%;
+      max-width: 1000px;
+      z-index: 30;
+      pointer-events: auto;
+    }
+    
+    #btnBack {
+      background: transparent; 
+      color: #888; 
+      border: 1px solid #888;
+      padding: 8px 20px; 
+      font-family: 'Orbitron', sans-serif; 
+      cursor: pointer;
+      text-transform: uppercase; 
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      border-radius: 4px;
+    }
+    #btnBack:hover { 
+      background: #333; 
+      color: #fff; 
+      border-color: #fff; 
+    }
+
+    /* === LAYOUT CENTRAL === */
+    #playerCenterGroup {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      gap: 60px; /* Aumentado de 30px para 60px para dar mais distância */
+      z-index: 20;
+    }
+
+    /* A Capa */
+    #activeColorLogo {
+      width: 128px;
+      height: 128px;
+      object-fit: contain;
+      opacity: 0;
+      pointer-events: none; 
+      -webkit-user-drag: none;
+      z-index: 10;
+      transform: scale(0.95);
+      /* Removido o transition daqui para o "fade out" ser um corte seco */
+    }
+    #activeColorLogo.visible {
+      opacity: 1;
+      transform: scale(1);
+      /* O fade in (entrada) continua suave. Quando a classe 'visible' é removida, corta na hora. */
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    /* Nome da Rádio Estático */
+    #radioNameText {
+      font-size: 2.2rem;
+      letter-spacing: 2px;
+      white-space: nowrap;
+      pointer-events: none;
+      color: #ffaa00; 
+      text-transform: uppercase;
+      min-height: 50px;
+      text-shadow: 0 0 10px rgba(255, 170, 0, 0.3);
+      transition: color 0.3s ease, opacity 0.5s ease;
+      opacity: 1; 
+    }
+
+    /* === ÁREA DE LOGS === */
+    #logArea {
+      position: absolute;
+      bottom: 20px;
+      width: 90%; max-width: 600px; height: 100px;
+      background: #0a0a0a; border: 1px solid #222; padding: 10px;
+      font-family: monospace; font-size: 0.8rem; color: #0f0;
+      overflow-y: auto; box-sizing: border-box;
+      pointer-events: auto; 
+      border-radius: 6px;
+    }
+    #logArea div { border-bottom: 1px solid #111; padding: 2px 0; }
+  </style>
+</head>
+<body>
+
+  <div id="viewMenu" class="view active">
+    <div id="menuTitle">San Andreas Radio</div>
+    <button id="btnStart" class="btn-start">Iniciar</button>
+  </div>
+
+  <div id="viewPlayer" class="view">
+    <div id="radioHeader">
+      <button id="btnBack">⬅ Desligar</button>
+    </div>
+
+    <div id="playerCenterGroup">
+      <img id="activeColorLogo" src="capas/default.png" draggable="false" />
+      <div id="radioNameText">K-DST</div>
+    </div>
+
+    <div id="logArea"></div>
+  </div>
+
+  <script src="geral.js"></script>
+  <script src="station.js"></script>
+  <script src="renderer.js"></script>
+  
+  <script>
+    // ----------------- SISTEMA DE LOGS -----------------
+    const logArea = document.getElementById('logArea');
+    const oldLog = console.log;
+    console.log = (...args) => {
+      oldLog(...args);
+      const line = document.createElement('div');
+      line.textContent = args.join(' ');
+      logArea.appendChild(line);
+      logArea.scrollTop = logArea.scrollHeight;
+    };
+
+    // ----------------- SONS DA INTERFACE -----------------
+    const uiAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    let staticBuffers = []; 
+    let currentStaticId = 0; 
+    let activeStaticNodes = new Set(); 
+
+    function forceWakeUpAudio() {
+        if (uiAudioCtx.state !== 'running') uiAudioCtx.resume();
+    }
+    ['click', 'touchstart', 'mousedown', 'wheel'].forEach(e => document.addEventListener(e, forceWakeUpAudio, {once:true}));
+
+    fetch('sound_002.wav').then(r=>r.arrayBuffer()).then(ab=>uiAudioCtx.decodeAudioData(ab)).then(b=>{ staticBuffers.push(b); console.log("✔️ sound_002.wav pronto"); }).catch(e=>console.error(e));
+    fetch('sound_003.wav').then(r=>r.arrayBuffer()).then(ab=>uiAudioCtx.decodeAudioData(ab)).then(b=>{ staticBuffers.push(b); console.log("✔️ sound_003.wav pronto"); }).catch(e=>console.error(e));
+
+    function loopNextStatic(expectedId) {
+        if (currentStaticId !== expectedId || staticBuffers.length === 0) return;
+
+        const buf = staticBuffers[Math.floor(Math.random() * staticBuffers.length)];
+        const src = uiAudioCtx.createBufferSource();
+        src.buffer = buf;
+        
+        src.connect(uiAudioCtx.destination);
+        activeStaticNodes.add(src); 
+        
+        src.onended = () => {
+            activeStaticNodes.delete(src); 
+            if (currentStaticId === expectedId) {
+                loopNextStatic(expectedId);
+            }
+        };
+        
+        src.start();
+    }
+
+    function playUIStatic() {
+        forceWakeUpAudio();
+        if (currentStaticId !== 0) return; 
+        
+        currentStaticId = Date.now(); 
+        loopNextStatic(currentStaticId);
+    }
+
+    function stopUIStatic() {
+        currentStaticId = 0; 
+        
+        activeStaticNodes.forEach(src => {
+            try { 
+                src.onended = null; 
+                src.stop(); 
+            } catch(e) {}
+        });
+        activeStaticNodes.clear(); 
+    }
+
+    // ----------------- CONFIGURAÇÃO DAS RÁDIOS (GTA SA) -----------------
+    const todasAsRadios = [
+      { key: 'radio_bounce_fm', name: 'Bounce FM', imgCol: 'capas/radio_bounce.png' },
+      { key: 'radio_csr', name: 'CSR 103.9', imgCol: 'capas/radio_csr.png' },
+      { key: 'radio_kdst', name: 'K-DST', imgCol: 'capas/radio_KDST.png' },
+      { key: 'radio_kjah', name: 'K-JAH West', imgCol: 'capas/radio_kjah.png' },
+      { key: 'radio_krose', name: 'K-Rose', imgCol: 'capas/radio_krose.png' },
+      { key: 'radio_master_sounds', name: 'Master Sounds 98.3', imgCol: 'capas/radio_mastersounds.png' },
+      { key: 'radio_playback_fm', name: 'Playback FM', imgCol: 'capas/radio_playback.png' },
+      { key: 'radio_x', name: 'Radio X', imgCol: 'capas/radio_RADIOX.png' },
+      { key: 'radio_rls', name: 'Radio Los Santos', imgCol: 'capas/radio_RLS.png' },
+      { key: 'radio_sfur', name: 'SF-UR', imgCol: 'capas/radio_SFUR.png' }
+    ];
+
+    // ----------------- ESTADO GLOBAL -----------------
+    let currentIndex = 0; 
+    let playTimeout = null;
+    let textHideTimeout = null; 
+    let currentlyPlayingKey = null; 
+
+    const viewMenu = document.getElementById('viewMenu');
+    const viewPlayer = document.getElementById('viewPlayer');
+    const activeColorLogo = document.getElementById('activeColorLogo');
+    const radioNameText = document.getElementById('radioNameText');
+
+    function updateCarousel(isFirstLoad = false) {
+      const N = todasAsRadios.length;
+      if(N === 0) return;
+      const activeIdx = ((currentIndex % N) + N) % N;
+      const rad = todasAsRadios[activeIdx];
+
+      clearTimeout(textHideTimeout);
+      radioNameText.style.opacity = '1';
+      radioNameText.textContent = rad.name;
+      radioNameText.style.color = '#fff'; 
+      activeColorLogo.classList.remove('visible');
+
+      if (!isFirstLoad) {
+          playUIStatic();
+          if(window.__RADIO && window.__RADIO.stopRadio) window.__RADIO.stopRadio();
+          
+          currentlyPlayingKey = null; 
+      }
+
+      clearTimeout(playTimeout);
+      playTimeout = setTimeout(() => {
+        
+        const imgLoader = new Image();
+        imgLoader.onload = () => { activeColorLogo.src = rad.imgCol; };
+        imgLoader.src = rad.imgCol;
+        
+        if (currentlyPlayingKey !== rad.key) {
+            if(window.__RADIO && window.__RADIO.startRadio) {
+              currentlyPlayingKey = rad.key;
+              window.__RADIO.startRadio(rad.key); 
+              
+              if (window._currentStopHandler) {
+                  window.removeEventListener('radio-ready', window._currentStopHandler);
+              }
+
+              window._currentStopHandler = () => {
+                  stopUIStatic();
+                  radioNameText.style.color = '#ffaa00'; 
+                  activeColorLogo.classList.add('visible'); 
+                  
+                  textHideTimeout = setTimeout(() => {
+                      radioNameText.style.opacity = '0';
+                  }, 1000);
+
+                  window.removeEventListener('radio-ready', window._currentStopHandler);
+                  window._currentStopHandler = null;
+                  clearTimeout(safetyTimeout); 
+              };
+
+              window.addEventListener('radio-ready', window._currentStopHandler);
+
+              const safetyTimeout = setTimeout(() => {
+                  if (window._currentStopHandler) window._currentStopHandler();
+              }, 5000);
+
+            } else {
+              stopUIStatic();
+            }
+        } else if (isFirstLoad) {
+            radioNameText.style.color = '#ffaa00';
+            activeColorLogo.classList.add('visible');
+            
+            textHideTimeout = setTimeout(() => {
+                radioNameText.style.opacity = '0';
+            }, 1000);
+        }
+      }, 800); 
+    }
+
+    function goNext() { currentIndex++; updateCarousel(); }
+    function goPrev() { currentIndex--; updateCarousel(); }
+
+    // ----------------- EVENTOS DE INTERAÇÃO -----------------
+    
+    document.getElementById('btnStart').addEventListener('click', () => {
+        forceWakeUpAudio(); 
+        
+        viewMenu.classList.remove('active');
+        viewPlayer.classList.add('active');
+        
+        currentIndex = 0; 
+        updateCarousel(true); 
+    });
+
+    document.getElementById('btnBack').addEventListener('click', (e) => {
+      e.stopPropagation(); 
+      clearTimeout(playTimeout);
+      clearTimeout(textHideTimeout);
+      
+      if(window.__RADIO && window.__RADIO.stopRadio) window.__RADIO.stopRadio();
+      
+      currentlyPlayingKey = null; 
+      stopUIStatic(); 
+
+      viewPlayer.classList.remove('active');
+      viewMenu.classList.add('active');
+    });
+
+    let lastWheelTime = 0;
+    viewPlayer.addEventListener('wheel', (e) => {
+      forceWakeUpAudio();
+      if (e.target.closest('#logArea')) return; 
+
+      e.preventDefault(); 
+      const now = Date.now();
+      if (now - lastWheelTime < 250) return; 
+      lastWheelTime = now;
+      
+      if (e.deltaY > 0) goNext(); 
+      else if (e.deltaY < 0) goPrev(); 
+    }, { passive: false });
+
+    let isDragging = false, startY = 0; 
+
+    const dragStart = (e) => { 
+      forceWakeUpAudio();
+      if (e.target.closest('#logArea') || e.target.closest('#btnBack')) return;
+      isDragging = true; 
+      const touch = e.type.includes('mouse') ? e : e.changedTouches[0];
+      startY = touch.clientY;
+    };
+
+    const dragEnd = (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      
+      const touch = e.type.includes('mouse') ? e : e.changedTouches[0];
+      const diffY = startY - touch.clientY; 
+
+      if (Math.abs(diffY) > 50) { 
+          if (diffY > 0) goNext(); 
+          else goPrev(); 
+      }
+    };
+
+    viewPlayer.addEventListener('mousedown', dragStart);
+    viewPlayer.addEventListener('mouseup', dragEnd);
+    viewPlayer.addEventListener('mouseleave', (e) => { if(isDragging) dragEnd(e); });
+    
+    viewPlayer.addEventListener('touchstart', dragStart, { passive: true });
+    viewPlayer.addEventListener('touchend', dragEnd);
+
+  </script>
+</body>
+</html>
