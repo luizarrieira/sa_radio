@@ -119,32 +119,30 @@
 
     /* A Capa */
     #activeColorLogo {
-      width: 128px;
-      height: 128px;
+      width: 256px; /* Tamanho original dobrado (128 * 2) */
+      height: 256px; /* Tamanho original dobrado (128 * 2) */
       object-fit: contain;
       opacity: 0;
       pointer-events: none; 
       -webkit-user-drag: none;
       z-index: 10;
       transform: scale(0.95);
-      /* Removido o transition daqui para o "fade out" ser um corte seco */
     }
     #activeColorLogo.visible {
       opacity: 1;
       transform: scale(1);
-      /* O fade in (entrada) continua suave. Quando a classe 'visible' é removida, corta na hora. */
       transition: opacity 0.4s ease, transform 0.4s ease;
     }
 
     /* Nome da Rádio Estático */
     #radioNameText {
-      font-size: 2.2rem;
-      letter-spacing: 2px;
+      font-size: 1.5rem; /* Fonte diminuída (era 2.2rem) */
+      letter-spacing: 3px; /* Aumentei um pouco o tracking pra compensar o tamanho menor e ficar elegante */
       white-space: nowrap;
       pointer-events: none;
       color: #ffaa00; 
       text-transform: uppercase;
-      min-height: 50px;
+      min-height: 40px; /* Reduzido para encaixar melhor com a fonte menor */
       text-shadow: 0 0 10px rgba(255, 170, 0, 0.3);
       transition: color 0.3s ease, opacity 0.5s ease;
       opacity: 1; 
