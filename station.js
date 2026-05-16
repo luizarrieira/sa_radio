@@ -1675,6 +1675,82 @@
   };
 
   /* ================================================================================= */
+  /* ================================== 11. WCTR ===================================== */
+  /* ================================================================================= */
+
+  const wctr_ids = [
+    'WCTR/id_all_the_news.ogg',
+    'WCTR/id_at_home_at_work_or_in_rehab.ogg',
+    'WCTR/id_deal_with_your_ignorance.ogg',
+    'WCTR/id_if_you_crave_news.ogg',
+    'WCTR/id_opinions_are_free.ogg',
+    'WCTR/id_people_dying_and_explosions.ogg',
+    'WCTR/id_sensationalist_bullshit.ogg',
+    'WCTR/id_talk_is_cheap.ogg'
+  ];
+
+  const wctr_programs = {
+    area_53: [
+      { name: 'AREA_53_EP1', intros: ['WCTR/area_53_episode_1_intro.ogg'], mid: 'WCTR/area_53_episode_1_mid.ogg', outros: ['WCTR/area_53_episode_1_outro.ogg'] },
+      { name: 'AREA_53_EP2', intros: ['WCTR/area_53_episode_2_intro.ogg'], mid: 'WCTR/area_53_episode_2_mid.ogg', outros: ['WCTR/area_53_episode_2_outro.ogg'] },
+      { name: 'AREA_53_EP3', intros: ['WCTR/area_53_episode_3_intro.ogg'], mid: 'WCTR/area_53_episode_3_mid.ogg', outros: ['WCTR/area_53_episode_3_outro.ogg'] }
+    ],
+    entertaining_america: [
+      { name: 'ENTERTAINING_AMERICA_EP1', intros: ['WCTR/entertaining_america_episode_1_intro.ogg'], mid: 'WCTR/entertaining_america_episode_1_mid.ogg', outros: ['WCTR/entertaining_america_episode_1_outro.ogg'] },
+      { name: 'ENTERTAINING_AMERICA_EP2', intros: ['WCTR/entertaining_america_episode_2_intro.ogg'], mid: 'WCTR/entertaining_america_episode_2_mid.ogg', outros: ['WCTR/entertaining_america_episode_2_outro.ogg'] },
+      { name: 'ENTERTAINING_AMERICA_EP3', intros: ['WCTR/entertaining_america_episode_3_intro.ogg'], mid: 'WCTR/entertaining_america_episode_3_mid.ogg', outros: ['WCTR/entertaining_america_episode_3_outro.ogg'] }
+    ],
+    entertaining_america_teaser: [
+      { name: 'ENTERTAINING_AMERICA_TEASER', intros: ['WCTR/entertaining_america_teaser_intro.ogg'], mid: 'WCTR/entertaining_america_teaser_mid.ogg', outros: ['WCTR/entertaining_america_teaser_outro.ogg'] }
+    ],
+    gardening_with_maurice: [
+      { name: 'GARDENING_WITH_MAURICE_EP1', intros: ['WCTR/gardening_with_maurice_episode_1_intro.ogg'], mid: 'WCTR/gardening_with_maurice_episode_1_mid.ogg', outros: ['WCTR/gardening_with_maurice_episode_1_outro.ogg'] },
+      { name: 'GARDENING_WITH_MAURICE_EP2', intros: ['WCTR/gardening_with_maurice_episode_2_intro.ogg'], mid: 'WCTR/gardening_with_maurice_episode_2_mid.ogg', outros: ['WCTR/gardening_with_maurice_episode_2_outro.ogg'] },
+      { name: 'GARDENING_WITH_MAURICE_TEASER1', intros: ['WCTR/gardening_with_maurice_teaser_1_intro.ogg'], mid: 'WCTR/gardening_with_maurice_teaser_1_mid.ogg', outros: ['WCTR/gardening_with_maurice_teaser_1_outro.ogg'] },
+      { name: 'GARDENING_WITH_MAURICE_TEASER2', intros: ['WCTR/gardening_with_maurice_teaser_2_intro.ogg'], mid: 'WCTR/gardening_with_maurice_teaser_2_mid.ogg', outros: ['WCTR/gardening_with_maurice_teaser_2_outro.ogg'] }
+    ],
+    i_say_you_say: [
+      { name: 'I_SAY_YOU_SAY_EP1', intros: ['WCTR/i_say_you_say_episode_1_intro.ogg'], mid: 'WCTR/i_say_you_say_episode_1_mid.ogg', outros: ['WCTR/i_say_you_say_episode_1_outro.ogg'] },
+      { name: 'I_SAY_YOU_SAY_EP2', intros: ['WCTR/i_say_you_say_episode_2_intro.ogg'], mid: 'WCTR/i_say_you_say_episode_2_mid.ogg', outros: ['WCTR/i_say_you_say_episode_2_outro.ogg'] }
+    ],
+    lonely_hearts: [
+      { name: 'LONELY_HEARTS_EP1', intros: ['WCTR/lonely_hearts_episode_1_intro.ogg'], mid: 'WCTR/lonely_hearts_episode_1_mid.ogg', outros: ['WCTR/lonely_hearts_episode_1_outro.ogg'] },
+      { name: 'LONELY_HEARTS_EP2', intros: ['WCTR/lonely_hearts_episode_2_intro.ogg'], mid: 'WCTR/lonely_hearts_episode_2_mid.ogg', outros: ['WCTR/lonely_hearts_episode_2_outro.ogg'] },
+      { name: 'LONELY_HEARTS_EP3', intros: ['WCTR/lonely_hearts_episode_3_intro.ogg'], mid: 'WCTR/lonely_hearts_episode_3_mid.ogg', outros: ['WCTR/lonely_hearts_episode_3_outro.ogg'] }
+    ],
+    the_tight_end_zone: [
+      { name: 'THE_TIGHT_END_ZONE_EP1', intros: ['WCTR/the_tight_end_zone_episode_1_intro.ogg'], mid: 'WCTR/the_tight_end_zone_episode_1_mid.ogg', outros: ['WCTR/the_tight_end_zone_episode_1_outro.ogg'] },
+      { name: 'THE_TIGHT_END_ZONE_EP2', intros: ['WCTR/the_tight_end_zone_episode_2_intro.ogg'], mid: 'WCTR/the_tight_end_zone_episode_2_mid.ogg', outros: ['WCTR/the_tight_end_zone_episode_2_outro.ogg'] }
+    ],
+    the_wild_traveler: [
+      { name: 'THE_WILD_TRAVELER_EP1', intros: ['WCTR/the_wild_traveler_episode_1_intro.ogg'], mid: 'WCTR/the_wild_traveler_episode_1_mid.ogg', outros: ['WCTR/the_wild_traveler_episode_1_outro.ogg'] },
+      { name: 'THE_WILD_TRAVELER_EP2', intros: ['WCTR/the_wild_traveler_episode_2_intro.ogg'], mid: 'WCTR/the_wild_traveler_episode_2_mid.ogg', outros: ['WCTR/the_wild_traveler_episode_2_outro.ogg'] }
+    ]
+  };
+
+  const wctr_news = {
+    1: { name: 'NEWS_EP01', intros: ['WCTR/news_episode_01_intro.ogg'], mid: 'WCTR/news_episode_01_mid.ogg', outros: ['WCTR/news_episode_01_outro.ogg'] },
+    3: { name: 'NEWS_EP02', intros: ['WCTR/news_episode_02_intro.ogg'], mid: 'WCTR/news_episode_02_mid.ogg', outros: ['WCTR/news_episode_02_outro.ogg'] },
+    5: { name: 'NEWS_EP03', intros: ['WCTR/news_episode_03_intro.ogg'], mid: 'WCTR/news_episode_03_mid.ogg', outros: ['WCTR/news_episode_03_outro.ogg'] },
+    7: { name: 'NEWS_EP04', intros: ['WCTR/news_episode_04_intro.ogg'], mid: 'WCTR/news_episode_04_mid.ogg', outros: ['WCTR/news_episode_04_outro.ogg'] },
+    11: { name: 'NEWS_EP05', intros: ['WCTR/news_episode_05_intro.ogg'], mid: 'WCTR/news_episode_05_mid.ogg', outros: ['WCTR/news_episode_05_outro.ogg'] },
+    14: { name: 'NEWS_EP06', intros: ['WCTR/news_episode_06_intro.ogg'], mid: 'WCTR/news_episode_06_mid.ogg', outros: ['WCTR/news_episode_06_outro.ogg'] },
+    17: { name: 'NEWS_EP07', intros: ['WCTR/news_episode_07_intro.ogg'], mid: 'WCTR/news_episode_07_mid.ogg', outros: ['WCTR/news_episode_07_outro.ogg'] },
+    21: { name: 'NEWS_EP08', intros: ['WCTR/news_episode_08_intro.ogg'], mid: 'WCTR/news_episode_08_mid.ogg', outros: ['WCTR/news_episode_08_outro.ogg'] },
+    24: { name: 'NEWS_EP09', intros: ['WCTR/news_episode_09_intro.ogg'], mid: 'WCTR/news_episode_09_mid.ogg', outros: ['WCTR/news_episode_09_outro.ogg'] },
+    28: { name: 'NEWS_EP10', intros: ['WCTR/news_episode_10_intro.ogg'], mid: 'WCTR/news_episode_10_mid.ogg', outros: ['WCTR/news_episode_10_outro.ogg'] },
+    30: { name: 'NEWS_EP11', intros: ['WCTR/news_episode_11_intro.ogg'], mid: 'WCTR/news_episode_11_mid.ogg', outros: ['WCTR/news_episode_11_outro.ogg'] }
+  };
+
+  const obj_wctr = {
+    isTalkRadio: true,
+    programs: wctr_programs,
+    newsPools: wctr_news,
+    grupoID: wctr_ids,
+    grupoAdv: G.adv.sa
+  };
+
+  /* ================================================================================= */
   /* =========================== EXPORTAÇÃO GLOBAL =================================== */
   /* ================================================================================= */
 
@@ -1698,7 +1774,8 @@
         'radio_playback_fm': obj_playback_fm,
         'radio_rls': obj_rls,
         'radio_x': obj_radio_x,
-        'radio_sfur': obj_sfur
+        'radio_sfur': obj_sfur,
+        'radio_wctr': obj_wctr // Injetada com sucesso!
       }
     }
   };
