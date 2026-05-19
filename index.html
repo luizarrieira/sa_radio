@@ -71,7 +71,7 @@
     #viewPlayer {
       cursor: grab;
       position: relative;
-      touch-action: pan-y; /* Permitir interações baseadas em Y no touch */
+      touch-action: pan-y;
     }
     #viewPlayer:active { cursor: grabbing; }
 
@@ -113,14 +113,14 @@
       align-items: center;
       justify-content: center;
       width: 100%;
-      gap: 60px; /* Aumentado de 30px para 60px para dar mais distância */
+      gap: 60px;
       z-index: 20;
     }
 
     /* A Capa */
     #activeColorLogo {
-      width: 256px; /* Tamanho original dobrado (128 * 2) */
-      height: 256px; /* Tamanho original dobrado (128 * 2) */
+      width: 256px;
+      height: 256px;
       object-fit: contain;
       opacity: 0;
       pointer-events: none; 
@@ -136,15 +136,16 @@
 
     /* Nome da Rádio Estático */
     #radioNameText {
-      font-size: 1.5rem; /* Fonte diminuída (era 2.2rem) */
-      letter-spacing: 3px; /* Aumentei um pouco o tracking pra compensar o tamanho menor e ficar elegante */
+      font-size: 1.5rem;
+      letter-spacing: 3px;
       white-space: nowrap;
       pointer-events: none;
       color: #ffaa00; 
       text-transform: uppercase;
-      min-height: 40px; /* Reduzido para encaixar melhor com a fonte menor */
+      min-height: 40px;
       text-shadow: 0 0 10px rgba(255, 170, 0, 0.3);
-      transition: color 0.3s ease, opacity 0.5s ease;
+      /* RETIRADO O FADE DE OPACITY AQUI: Transição apenas para a cor */
+      transition: color 0.3s ease;
       opacity: 1; 
     }
 
@@ -201,26 +202,73 @@
     // ----------------- SONS DA INTERFACE -----------------
     const uiAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
     
-    let staticBuffers = []; 
+    // Controlador de volume da estática
+    const staticGainNode = uiAudioCtx.createGain();
+    staticGainNode.gain.value = 0.75; 
+    staticGainNode.connect(uiAudioCtx.destination);
+
+    // Mapeamento específico dos arquivos para controle lógico
+    let staticBuffers = { '002': null, '003': null }; 
     let currentStaticId = 0; 
     let activeStaticNodes = new Set(); 
+    
+    // Variáveis de controle de repetição
+    let lastStaticSound = null;
+    let staticRepeatCount = 0;
 
     function forceWakeUpAudio() {
         if (uiAudioCtx.state !== 'running') uiAudioCtx.resume();
     }
     ['click', 'touchstart', 'mousedown', 'wheel'].forEach(e => document.addEventListener(e, forceWakeUpAudio, {once:true}));
 
-    fetch('sound_002.wav').then(r=>r.arrayBuffer()).then(ab=>uiAudioCtx.decodeAudioData(ab)).then(b=>{ staticBuffers.push(b); console.log("✔️ sound_002.wav pronto"); }).catch(e=>console.error(e));
-    fetch('sound_003.wav').then(r=>r.arrayBuffer()).then(ab=>uiAudioCtx.decodeAudioData(ab)).then(b=>{ staticBuffers.push(b); console.log("✔️ sound_003.wav pronto"); }).catch(e=>console.error(e));
+    fetch('sound_002.wav').then(r=>r.arrayBuffer()).then(ab=>uiAudioCtx.decodeAudioData(ab)).then(b=>{ staticBuffers['002'] = b; console.log("✔️ sound_002.wav pronto"); }).catch(e=>console.error(e));
+    fetch('sound_003.wav').then(r=>r.arrayBuffer()).then(ab=>uiAudioCtx.decodeAudioData(ab)).then(b=>{ staticBuffers['003'] = b; console.log("✔️ sound_003.wav pronto"); }).catch(e=>console.error(e));
+
+    // Lógica para decidir qual é a próxima estática
+    function getNextStaticKey() {
+        let keys = Object.keys(staticBuffers).filter(k => staticBuffers[k] !== null);
+        if (keys.length === 0) return null;
+        if (keys.length === 1) return keys[0]; // Retorna o único que carregou, se for o caso
+
+        let nextSound = Math.random() < 0.5 ? '002' : '003';
+
+        // Regra 1: '003' toca apenas uma vez (se o último foi 003, força o 002)
+        if (lastStaticSound === '003' && nextSound === '003') {
+            nextSound = '002';
+        } 
+        // Regra 2: '002' toca no máximo 2 vezes seguidas
+        else if (lastStaticSound === '002' && nextSound === '002') {
+            if (staticRepeatCount >= 2) {
+                nextSound = '003';
+            }
+        }
+
+        // Atualiza a memória para o próximo loop
+        if (nextSound === lastStaticSound) {
+            staticRepeatCount++;
+        } else {
+            lastStaticSound = nextSound;
+            staticRepeatCount = 1;
+        }
+
+        return nextSound;
+    }
 
     function loopNextStatic(expectedId) {
-        if (currentStaticId !== expectedId || staticBuffers.length === 0) return;
+        if (currentStaticId !== expectedId) return;
 
-        const buf = staticBuffers[Math.floor(Math.random() * staticBuffers.length)];
+        const soundKey = getNextStaticKey();
+        if (!soundKey) {
+            // Se ainda não carregou os áudios, tenta novamente em breve
+            setTimeout(() => loopNextStatic(expectedId), 100);
+            return;
+        }
+
         const src = uiAudioCtx.createBufferSource();
-        src.buffer = buf;
+        src.buffer = staticBuffers[soundKey];
         
-        src.connect(uiAudioCtx.destination);
+        // Liga o áudio no regulador de volume, não direto na saída final
+        src.connect(staticGainNode);
         activeStaticNodes.add(src); 
         
         src.onended = () => {
@@ -238,6 +286,11 @@
         if (currentStaticId !== 0) return; 
         
         currentStaticId = Date.now(); 
+        
+        // Reseta o contador sempre que girar o dial
+        lastStaticSound = null;
+        staticRepeatCount = 0;
+        
         loopNextStatic(currentStaticId);
     }
 
@@ -256,7 +309,7 @@
     // ----------------- CONFIGURAÇÃO DAS RÁDIOS (GTA SA) -----------------
     const todasAsRadios = [
       { key: 'radio_playback_fm', name: 'Playback FM', imgCol: 'capas/radio_playback.png' },
-      { key: 'radio_krose', name: 'K-Rose', imgCol: 'capas/radio_krose.png' },
+      { key: 'radio_krose', name: 'K Rose', imgCol: 'capas/radio_krose.png' }, // Corrigido
       { key: 'radio_kdst', name: 'K-DST', imgCol: 'capas/radio_KDST.png' },
       { key: 'radio_bounce_fm', name: 'Bounce FM', imgCol: 'capas/radio_bounce.png' },
       { key: 'radio_sfur', name: 'SF-UR', imgCol: 'capas/radio_SFUR.png' },
@@ -265,7 +318,7 @@
       { key: 'radio_csr', name: 'CSR 103.9', imgCol: 'capas/radio_csr.png' },
       { key: 'radio_kjah', name: 'K-JAH West', imgCol: 'capas/radio_kjah.png' },
       { key: 'radio_master_sounds', name: 'Master Sounds 98.3', imgCol: 'capas/radio_mastersounds.png' },
-      { key: 'radio_wctr', name: 'WCTR', imgCol: 'capas/radio_WCTR.png' } // Nome da capa ajustado!
+      { key: 'radio_wctr', name: 'WCTR', imgCol: 'capas/radio_WCTR.png' }
     ];
 
     // ----------------- ESTADO GLOBAL -----------------
@@ -320,7 +373,7 @@
                   activeColorLogo.classList.add('visible'); 
                   
                   textHideTimeout = setTimeout(() => {
-                      radioNameText.style.opacity = '0';
+                      radioNameText.style.opacity = '0'; // Corte seco de desaparecimento
                   }, 1000);
 
                   window.removeEventListener('radio-ready', window._currentStopHandler);
@@ -342,7 +395,7 @@
             activeColorLogo.classList.add('visible');
             
             textHideTimeout = setTimeout(() => {
-                radioNameText.style.opacity = '0';
+                radioNameText.style.opacity = '0'; // Corte seco de desaparecimento
             }, 1000);
         }
       }, 800); 
