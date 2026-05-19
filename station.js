@@ -1742,12 +1742,20 @@
     30: { name: 'NEWS_EP11', intros: ['WCTR/news_episode_11_intro.ogg'], mid: 'WCTR/news_episode_11_mid.ogg', outros: ['WCTR/news_episode_11_outro.ogg'] }
   };
 
+  // WCTR não reage ao clima nem possui marcações de horário
+  const wctr_time = {};
+  const wctr_weather = {};
+  const wctr_story = {};
+
   const obj_wctr = {
     isTalkRadio: true,
     programs: wctr_programs,
     newsPools: wctr_news,
     grupoID: wctr_ids,
-    grupoAdv: G.adv.sa
+    grupoAdv: G.adv.sa,
+    timePools: wctr_time,
+    weatherPools: wctr_weather,
+    storyPools: wctr_story
   };
 
   /* ================================================================================= */
